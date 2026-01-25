@@ -1,19 +1,18 @@
-
 import streamlit as st
 from openai import OpenAI
-import fitz
+import pymupdf as fitz
 
 
-#helper function for reading these PDFs
+# Helper function for reading PDFs
 def read_pdf(pdf_file):
     pdf_contents = pdf_file.read()
     document = fitz.open(stream=pdf_contents, filetype="pdf")
-    text = "" #empty buffer
+    text = ""
     for page in document:
         text += page.get_text()
     document.close()
     return text
-#---------------------------------------
+
 
 # Show title and description.
 st.title("MY (Ryan) Document question answering")
@@ -23,18 +22,14 @@ st.write(
 )
 
 # Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
 else:
-
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
     try:
-
         client.models.list()
         st.success("API Key valid, proceed...")
 
@@ -50,26 +45,39 @@ else:
             disabled=not uploaded_file,
         )
 
-        #change below to allow text and pdf, pdf doesn't appear to be handled by this. 
         if uploaded_file and question:
 
-            # Process the uploaded file and question.
-            document = uploaded_file.read().decode()
-            messages = [
-                {
-                    "role": "user",
-                    "content": f"Here's a document: {document} \n\n---\n\n {question}",
-                }
-            ]
+            # Check file extension and process accordingly
+            file_extension = uploaded_file.name.split('.')[-1].lower()
+            
+            if file_extension == 'txt':
+                document = uploaded_file.read().decode()
+            elif file_extension == 'pdf':
+                document = read_pdf(uploaded_file)
+            else:
+                st.error("Unsupported file type.")
+                document = None
 
-            # Generate an answer using the OpenAI API.
-            stream = client.chat.completions.create(
-                model="gpt-3.5-turbo", ##might need to be changed with new formatting for adding a model selector. 
-                messages=messages,
-                stream=True,
-            )
+            if document:
+                messages = [
+                    {
+                        "role": "user",
+                        "content": f"Here's a document: {document} \n\n---\n\n {question}",
+                    }
+                ]
 
-            # Stream the response to the app using `st.write_stream`.
-            st.write_stream(stream)
+                # Generate an answer using the OpenAI API.
+                stream = client.chat.completions.create(
+                   # model="gpt-3.5-turbo", #huge paragraph, content sounded good
+                   # model="gpt-4o-mini", #good amount of content, but parsed it with numbers for good reading spacing
+                   # model="gpt-5-chat-latest", # more formatting on the output, made it more human readable for myself and fast response time
+                    model="gpt-5-nano", #similar to 5 chat latest, but doesn't use emojis and just uses periods or dots for highlighting stop points
+                    messages=messages,
+                    stream=True,
+                )
+
+                # Stream the response to the app using `st.write_stream`.
+                st.write_stream(stream)
+
     except Exception as e:
-        st.error("Invalid API Key, please try again.") 
+        st.error("Invalid API Key, please try again.")
