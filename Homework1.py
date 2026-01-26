@@ -21,63 +21,65 @@ st.write(
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-else:
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+# Ask user for their OpenAI API key via `st.secrets`.
+try:
+    openai_api_key = st.secrets["OPENAI_API_KEY"]
+except (KeyError, FileNotFoundError):
+    st.error("OpenAI API key not found. Please configure it in .streamlit/secrets.toml", icon="🗝️")
+    st.stop()
 
-    try:
-        client.models.list()
-        st.success("API Key valid, proceed...")
+# Create an OpenAI client.
+client = OpenAI(api_key=openai_api_key)
 
-        # Let the user upload a file via `st.file_uploader`.
-        uploaded_file = st.file_uploader(
-            "Upload a document (.txt or .pdf)", type=("txt", "pdf")
-        )
+try:
+    client.models.list()
+    st.success("API Key valid, proceed...")
 
-        # Ask the user for a question via `st.text_area`.
-        question = st.text_area(
-            "Now ask a question about the document!",
-            placeholder="Can you give me a short summary?",
-            disabled=not uploaded_file,
-        )
+    # Let the user upload a file via `st.file_uploader`.
+    uploaded_file = st.file_uploader(
+        "Upload a document (.txt or .pdf)", type=("txt", "pdf")
+    )
 
-        if uploaded_file and question:
+    # Ask the user for a question via `st.text_area`.
+    question = st.text_area(
+        "Now ask a question about the document!",
+        placeholder="Can you give me a short summary?",
+        disabled=not uploaded_file,
+    )
 
-            # Check file extension and process accordingly
-            file_extension = uploaded_file.name.split('.')[-1].lower()
-            
-            if file_extension == 'txt':
-                document = uploaded_file.read().decode()
-            elif file_extension == 'pdf':
-                document = read_pdf(uploaded_file)
-            else:
-                st.error("Unsupported file type.")
-                document = None
+    if uploaded_file and question:
 
-            if document:
-                messages = [
-                    {
-                        "role": "user",
-                        "content": f"Here's a document: {document} \n\n---\n\n {question}",
-                    }
-                ]
+        # Check file extension and process accordingly
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        
+        if file_extension == 'txt':
+            document = uploaded_file.read().decode()
+        elif file_extension == 'pdf':
+            document = read_pdf(uploaded_file)
+        else:
+            st.error("Unsupported file type.")
+            document = None
 
-                # Generate an answer using the OpenAI API.
-                stream = client.chat.completions.create(
-                   # model="gpt-3.5-turbo", #huge paragraph, content sounded good
-                   # model="gpt-4o-mini", #good amount of content, but parsed it with numbers for good reading spacing
-                   # model="gpt-5-chat-latest", # more formatting on the output, made it more human readable for myself and fast response time
-                    model="gpt-5-nano", #similar to 5 chat latest, but doesn't use emojis and just uses periods or dots for highlighting stop points
-                    messages=messages,
-                    stream=True,
-                )
+        if document:
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"Here's a document: {document} \n\n---\n\n {question}",
+                }
+            ]
 
-                # Stream the response to the app using `st.write_stream`.
-                st.write_stream(stream)
+            # Generate an answer using the OpenAI API.
+            stream = client.chat.completions.create(
+               # model="gpt-3.5-turbo", #huge paragraph, content sounded good
+               # model="gpt-4o-mini", #good amount of content, but parsed it with numbers for good reading spacing
+               # model="gpt-5-chat-latest", # more formatting on the output, made it more human readable for myself and fast response time
+                model="gpt-5-nano", #similar to 5 chat latest, but doesn't use emojis and just uses periods or dots for highlighting stop points
+                messages=messages,
+                stream=True,
+            )
 
-    except Exception as e:
-        st.error("Invalid API Key, please try again.")
+            # Stream the response to the app using `st.write_stream`.
+            st.write_stream(stream)
+
+except Exception as e:
+    st.error("Invalid API Key, please try again.")
