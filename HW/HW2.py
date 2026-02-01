@@ -42,7 +42,7 @@ llm_provider = st.sidebar.selectbox(
 
 model_options = {
     "OpenAI": ["gpt-4o-mini", "gpt-4o"],
-    "Google (Gemini)": ["gemini-1.5-flash", "gemini-1.5-pro"]
+    "Google (Gemini)": ["gemini-2.5-flash", "gemini-2.5-pro"]
 }
 
 selected_model = st.sidebar.selectbox(
