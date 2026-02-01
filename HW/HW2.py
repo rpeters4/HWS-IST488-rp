@@ -104,7 +104,7 @@ if st.button("Summarize"):
                 elif llm_provider == "Google (Gemini)":
                     genai.configure(api_key=api_key)
                     model = genai.GenerativeModel(selected_model)
-                     response_stream = model.generate_content(prompt, stream=True)
+                    response_stream = model.generate_content(prompt, stream=True)
                     
                     # Stream logic for Gemini
                     def stream_gemini(response):
