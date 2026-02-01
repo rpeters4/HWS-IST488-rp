@@ -65,6 +65,16 @@ elif llm_provider == "Google (Gemini)":
         api_key = st.secrets["GOOGLE_API_KEY"]
     except (KeyError, FileNotFoundError):
         st.sidebar.warning("Google API Key not found. Please add `GOOGLE_API_KEY` to `.streamlit/secrets.toml`.")
+    
+    if api_key:
+        with st.sidebar.expander("Debug: Available Gemini Models"):
+            try:
+                genai.configure(api_key=api_key)
+                for m in genai.list_models():
+                    if 'generateContent' in m.supported_generation_methods:
+                        st.write(m.name)
+            except Exception as e:
+                st.error(f"Error listing models: {e}")
 
 
 
