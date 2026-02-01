@@ -50,7 +50,6 @@ selected_model = st.sidebar.selectbox(
     model_options.get(llm_provider, [])
 )
 
-use_advanced_model = st.sidebar.checkbox("Use Advanced Model (if applicable/mapped logic needed)")
 
 # API Keys
 api_key = None
