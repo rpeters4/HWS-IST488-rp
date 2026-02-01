@@ -2,7 +2,7 @@ import streamlit as st
 
 # Define pages
 hw1 = st.Page("HW/Homework1.py", title="Homework 1", icon=":material/description:", default=True)
-hw2 = st.Page("HW/HW2.py", title="Homework 2", icon=":material/extension:")
+hw2 = st.Page("HW/HW2.py", title="Homework 2", icon=":material/description:")
 
 # Create navigation
 pg = st.navigation([hw1, hw2])
