@@ -36,7 +36,7 @@ url2 = st.sidebar.text_input("URL 2", placeholder="https://example.com/2")
 llm_provider = st.sidebar.selectbox("Select LLM Vendor", ["OpenAI", "Google (Gemini)"])
 
 model_options = {
-    "OpenAI": ["gpt-4o"], 
+    "OpenAI": ["gpt-4o"], # Latest premium model
     "Google (Gemini)": ["gemini-2.5-pro"] 
 }
 
