@@ -4,3 +4,5 @@ pymupdf
 beautifulsoup4
 requests
 google-generativeai
+chromadb
+tiktoken
