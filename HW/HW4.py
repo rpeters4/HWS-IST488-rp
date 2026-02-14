@@ -199,6 +199,10 @@ if prompt := st.chat_input("Ask a question about Student Organizations"):
                     filename = results['metadatas'][0][i]['filename']
                     context_text += f"\n\n--- Source: {filename} ---\n{doc}"
                     retrieved_docs.append(filename)
+    
+    # Store debug info
+    st.session_state.last_context_length = len(context_text)
+    st.session_state.last_retrieved_docs = retrieved_docs
 
     # Prepare messages for LLM
     system_prompt = (
@@ -226,3 +230,23 @@ if prompt := st.chat_input("Ask a question about Student Organizations"):
         response = st.write_stream(stream)
     
     st.session_state.hw4_messages.append({"role": "assistant", "content": response})
+
+# --- Debug Sidebar ---
+with st.sidebar:
+    st.header("Debug Tool")
+    if "last_context_length" in st.session_state:
+        st.write(f"**Context Length:** {st.session_state.last_context_length} chars")
+    
+    if "last_retrieved_docs" in st.session_state:
+        st.write("**Retrieved Documents:**")
+        # De-duplicate filenames for display while keeping order
+        seen = set()
+        seen_add = seen.add
+        unique_docs = [x for x in st.session_state.last_retrieved_docs if not (x in seen or seen_add(x))]
+        
+        for doc in unique_docs:
+            st.write(f"- {doc}")
+            
+    if st.button("Clear Conversation"):
+        st.session_state.hw4_messages = []
+        st.rerun()
