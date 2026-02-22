@@ -6,8 +6,8 @@ import chromadb
 from bs4 import BeautifulSoup
 
 # ---------- Page Setup ----------
-st.title("HW 5: Enhanced Student Org Chatbot 🤖")
-st.write("Ask questions about Syracuse University student organizations — powered by RAG + function calling.")
+st.title("HW 5: Enhanced Student Org Chatbot")
+st.write("Ask questions about Syracuse University student organizations.")
 
 # ---------- API Key ----------
 try:
@@ -197,7 +197,7 @@ for message in st.session_state.hw5_messages:
         st.markdown(message["content"])
 
 # ---------- Chat Input & Function-Calling Loop ----------
-if prompt := st.chat_input("Ask about Student Organizations"):
+if prompt := st.chat_input("Ask about Student Organizations at Syracuse University"):
     # Add & display user message
     st.session_state.hw5_messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
